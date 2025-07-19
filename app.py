@@ -4,7 +4,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import joblib
 
-# Your time array (copy-paste the full array as needed)
 time_values = np.array([
     0,
     1.00E-12, 2.30E-12, 3.80E-12, 5.30E-12, 6.80E-12, 8.30E-12, 9.80E-12, 1.13E-11, 1.28E-11, 1.43E-11, 1.58E-11,
