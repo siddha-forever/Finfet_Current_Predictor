@@ -56,7 +56,7 @@ fig, ax = plt.subplots()
 ax.plot(time_values, id_pred)
 ax.set_xlabel("Time (s)")
 ax.set_ylabel(r"$I_{d}$ (A)")
-ax.set_title(r"Predicted Time vs. $I_{d}$ ($\phi$, $\theta$, LET selected)")
+ax.set_title(r"Radiation Curve")
 ax.grid(True)
 st.pyplot(fig)
 
