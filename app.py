@@ -40,9 +40,9 @@ st.title("FINFET $I_{d}$ and Charge Predictor")
 st.latex(r"\text{FINFET}\ I_{d}\ \text{Drain Current Predictor}")
 
 # --- User parameter inputs ---
-phi = st.number_input("Phi (°):", min_value=0.0, max_value=360.0, value=60.0, format="%.2f")
-theta = st.number_input("Theta (°):", min_value=0.0, max_value=360.0, value=60.0, format="%.2f")
-let = st.number_input("LET (°):", min_value=1.25, max_value=360.0, value=100.0, format="%.2f")
+phi = st.number_input("Phi°: ", min_value=0.0, max_value=360.0, value=60.0, format="%.2f")
+theta = st.number_input("Theta°: ", min_value=0.0, max_value=360.0, value=60.0, format="%.2f")
+let = st.number_input("LET°: ", min_value=1.25, max_value=360.0, value=100.0, format="%.2f")
 
 # --- Prepare DataFrame for prediction ---
 input_df = pd.DataFrame({
