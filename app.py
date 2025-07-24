@@ -3,7 +3,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import joblib
+from scipy.integrate import cumulative_trapezoid
 
+# --- Time values for prediction ---
 time_values = np.array([
     0,
     1.00E-12, 2.30E-12, 3.80E-12, 5.30E-12, 6.80E-12, 8.30E-12, 9.80E-12, 1.13E-11, 1.28E-11, 1.43E-11, 1.58E-11,
@@ -26,21 +28,23 @@ time_values = np.array([
     3.87E-11, 3.98E-11, 4.13E-11, 4.28E-11, 4.43E-11, 4.58E-11, 4.73E-11, 4.88E-11, 5.00E-11
 ])
 
-# Load model function
+# --- Load model ---
 @st.cache_resource
 def load_model():
     return joblib.load('finfet_random_model_compressed.pkl')
+
 model = load_model()
 
-# st.latex(r"\text{Time vs.}\ I_{d}\ \text{Curve (User-selected }\phi,\,\theta,\,\text{LET)}")
+# --- App Header ---
+st.title("FINFET $I_{d}$ and Charge Predictor")
 st.latex(r"\text{FINFET}\ I_{d}\ \text{Drain Current Predictor}")
 
-# Get user parameters
-phi = st.number_input("Phi° :", min_value=0.0, max_value=360.0, value=60.0, format="%.2f")
-theta = st.number_input("Theta° :", min_value=0.0, max_value=360.0, value=60.0, format="%.2f")
-let = st.number_input("LET° :", min_value=1.24, max_value=360.0, value=100.0, format="%.2f")
+# --- User parameter inputs ---
+phi = st.number_input("Phi (°):", min_value=0.0, max_value=360.0, value=60.0, format="%.2f")
+theta = st.number_input("Theta (°):", min_value=0.0, max_value=360.0, value=60.0, format="%.2f")
+let = st.number_input("LET (°):", min_value=1.25, max_value=360.0, value=100.0, format="%.2f")
 
-# Prepare the DataFrame for prediction
+# --- Prepare DataFrame for prediction ---
 input_df = pd.DataFrame({
     "phi": np.full_like(time_values, phi, dtype=float),
     "theta": np.full_like(time_values, theta, dtype=float),
@@ -48,21 +52,42 @@ input_df = pd.DataFrame({
     "time": time_values
 })
 
-# Predict Id for each time
+# --- Model prediction ---
 id_pred = model.predict(input_df)
 
-# Plot
-fig, ax = plt.subplots()
-ax.plot(time_values, id_pred)
-ax.set_xlabel("Time (s)")
-ax.set_ylabel(r"$I_{d}$ (A)")
-ax.set_title(r"Radiation Curve")
-ax.grid(True)
-st.pyplot(fig)
+# --- Integrate Id for charge using cumulative_trapezoid ---
+charge = cumulative_trapezoid(id_pred, time_values, initial=0)
 
-# Optionally display data table
-if st.checkbox("Show prediction table"):
+# --- Side-by-side plots with Streamlit columns ---
+col1, col2 = st.columns(2)
+
+with col1:
+    fig1, ax1 = plt.subplots()
+    ax1.plot(time_values, id_pred)
+    ax1.set_xlabel("Time (s)")
+    ax1.set_ylabel(r"$I_{d}$ (A)")
+    ax1.set_title("Predicted $I_{d}$ vs Time")
+    ax1.grid(True)
+    st.pyplot(fig1)
+
+with col2:
+    fig2, ax2 = plt.subplots()
+    ax2.plot(time_values, charge)
+    ax2.set_xlabel("Time (s)")
+    ax2.set_ylabel("Charge (Coulombs)")
+    ax2.set_title("Charge vs Time (Integrated $I_{d}$)")
+    ax2.grid(True)
+    st.pyplot(fig2)
+
+# --- Show tables if requested ---
+if st.checkbox("Show current prediction table"):
     st.dataframe(pd.DataFrame({
         "Time (s)": time_values,
         r"$I_{d}$ (A)": id_pred
+    }))
+
+if st.checkbox("Show charge table"):
+    st.dataframe(pd.DataFrame({
+        "Time (s)": time_values,
+        "Charge (Coulombs)": charge
     }))
